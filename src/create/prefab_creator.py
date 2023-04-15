@@ -64,17 +64,19 @@ def create_input_player (world: esper.World):
     world.add_component(input_up, CInputCommand('PLAYER_UP', pygame.K_UP))
     world.add_component(input_down, CInputCommand('PLAYER_DOWN', pygame.K_DOWN))
 
-def create_bullet(world: esper.World, bullet_info: dict, player: int, pos_mouse: pygame.Vector2):
+def create_bullet(world: esper.World, bullet_info: dict, player_entity: int, pos_mouse: pygame.Vector2):
     size = pygame.Vector2(bullet_info['size']['x'],
                           bullet_info['size']['y'])
     color = pygame.Color(bullet_info['color']['r'],
                          bullet_info['color']['g'],
                          bullet_info['color']['b'])
-    vel = pygame.Vector2(-bullet_info['velocity'],
+    vel = pygame.Vector2(bullet_info['velocity'],
                           bullet_info['velocity'])
-    x,y=pos_mouse
-    pos = pygame.Vector2(x, y) ##Hay que corregirlo
-
+    pl_t = world.component_for_entity(player_entity, CTransform)
+    pl_s = world.component_for_entity(player_entity, CSurface)
+    pos_x = pl_t.pos.x + pl_s.surf.get_width()/2 ##Hay que corregirlo
+    pos_y = pl_t.pos.y + pl_s.surf.get_height()/2
+    pos = pygame.Vector2(pos_x, pos_y)
     bullet_entity = create_square(world, size, pos, vel, color)
     world.add_component(bullet_entity, CTagBullet())
 

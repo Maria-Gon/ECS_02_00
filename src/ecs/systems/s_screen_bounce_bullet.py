@@ -17,5 +17,4 @@ def system_screen_bounce_bullet(world:esper.World, screen:pygame.Surface):
     for bullet_entity, (c_t, c_s, c_b) in components:
         bullet = c_s.surf.get_rect(topleft=c_t.pos)
         if bullet.left < 0 or bullet.right > screen_rect.width or bullet.top < 0 or bullet.bottom > screen_rect.height:
-            print('supongo que se elimina')
             world.delete_entity(bullet_entity)

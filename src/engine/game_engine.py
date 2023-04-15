@@ -2,7 +2,9 @@ import json
 import pygame
 import esper
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
+from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
+from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.systems.s_collision_bullet_enemy import system_collision_bullet_enemy
 from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
@@ -64,6 +66,9 @@ class GameEngine:
         create_enemy_spawner(self.ecs_world, self.level_01_cfg)
         create_input_player(self.ecs_world)
         create_input_bullet(self.ecs_world)
+
+        self._num_bullets = 0
+        self._max_bullets = self.level_01_cfg['player_spawn']['max_bullets']
         
 
     def _calculate_time(self):
@@ -78,6 +83,7 @@ class GameEngine:
                 self.is_running = False
 
     def _update(self):
+        self._num_bullets = len(self.ecs_world.get_component(CTagBullet))
         system_enemy_spawner(self.ecs_world, self.enemies_cfg, self.delta_time)
         system_movement(self.ecs_world, self.delta_time)
         system_screen_bounce(self.ecs_world, self.screen)
@@ -113,18 +119,14 @@ class GameEngine:
             elif c_input.phase == CommandPhase.END:
                 self._player_c_v.vel.y += self.player_cfg['input_velocity']
         if c_input.name == 'PLAYER_DOWN':
-            print('yes')
             if c_input.phase == CommandPhase.START:
                 self._player_c_v.vel.y += self.player_cfg['input_velocity']
             elif c_input.phase == CommandPhase.END:
                 self._player_c_v.vel.y -= self.player_cfg['input_velocity']
         if c_input.name == 'PLAYER_CLICK':
-            print('yes')
-            if c_input.phase == CommandPhase.START:
-                print('yes')
-                self._bullet_pos = pygame.mouse.get_pos()
-                create_bullet(self.ecs_world, self.bullet_cfg, self._player_entity, self._bullet_pos)
+            if c_input.phase == CommandPhase.START and self._num_bullets < self._max_bullets:
+                self._mouse_pos = pygame.mouse.get_pos()
+                create_bullet(self.ecs_world, self.bullet_cfg, self._player_entity, self._mouse_pos)
             elif c_input.phase == CommandPhase.END:
-                print('no')
-                self._bullet_pos = pygame.mouse.get_pos()
+                pass
     
