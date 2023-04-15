@@ -84,7 +84,7 @@ class GameEngine:
         system_screen_bounce_player(self.ecs_world, self.screen)
         system_screen_bounce_bullet(self.ecs_world, self.screen)
         system_collision_player_enemy(self.ecs_world, self._player_entity, self.level_01_cfg)
-        #system_collision_bullet_enemy(self.ecs_world)
+        system_collision_bullet_enemy(self.ecs_world)
         self.ecs_world._clear_dead_entities()
 
     def _draw(self):
