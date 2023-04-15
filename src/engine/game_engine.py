@@ -3,15 +3,18 @@ import pygame
 import esper
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_velocity import CVelocity
+from src.ecs.systems.s_collision_bullet_enemy import system_collision_bullet_enemy
 from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
+from src.ecs.systems.s_input_bullet import system_input_bullet
 from src.ecs.systems.s_input_player import system_input_player
 
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
-
-from src.create.prefab_creator import create_enemy_spawner, create_input_player, create_player_square
+from src.ecs.systems.s_screen_bounce_player import system_screen_bounce_player
+from src.create.prefab_creator import create_bullet, create_enemy_spawner, create_input_bullet, create_input_player, create_player_square
+from src.ecs.systems.s_screen_bounce_bullet import system_screen_bounce_bullet
 
 class GameEngine:
     def __init__(self) -> None:
@@ -41,6 +44,8 @@ class GameEngine:
             self.level_01_cfg = json.load(level_01_file)
         with open("assets/cfg/player.json") as player_file:
             self.player_cfg = json.load(player_file)
+        with open("assets/cfg/bullet.json") as bullet_file:
+            self.bullet_cfg = json.load(bullet_file)
 
     def run(self) -> None:
         self._create()
@@ -55,8 +60,11 @@ class GameEngine:
     def _create(self):
         self._player_entity = create_player_square(self.ecs_world, self.player_cfg, self.level_01_cfg['player_spawn'])
         self._player_c_v = self.ecs_world.component_for_entity(self._player_entity, CVelocity)
+        #create_bullet(self.ecs_world, self.bullet_cfg, self._player_entity)
         create_enemy_spawner(self.ecs_world, self.level_01_cfg)
         create_input_player(self.ecs_world)
+        create_input_bullet(self.ecs_world)
+        
 
     def _calculate_time(self):
         self.clock.tick(self.framerate)
@@ -65,6 +73,7 @@ class GameEngine:
     def _process_events(self):
         for event in pygame.event.get():
             system_input_player(self.ecs_world, event, self._do_action)
+            system_input_bullet(self.ecs_world, event, self._do_action)
             if event.type == pygame.QUIT:
                 self.is_running = False
 
@@ -72,7 +81,10 @@ class GameEngine:
         system_enemy_spawner(self.ecs_world, self.enemies_cfg, self.delta_time)
         system_movement(self.ecs_world, self.delta_time)
         system_screen_bounce(self.ecs_world, self.screen)
+        system_screen_bounce_player(self.ecs_world, self.screen)
+        system_screen_bounce_bullet(self.ecs_world, self.screen)
         system_collision_player_enemy(self.ecs_world, self._player_entity, self.level_01_cfg)
+        #system_collision_bullet_enemy(self.ecs_world)
         self.ecs_world._clear_dead_entities()
 
     def _draw(self):
@@ -101,8 +113,18 @@ class GameEngine:
             elif c_input.phase == CommandPhase.END:
                 self._player_c_v.vel.y += self.player_cfg['input_velocity']
         if c_input.name == 'PLAYER_DOWN':
+            print('yes')
             if c_input.phase == CommandPhase.START:
                 self._player_c_v.vel.y += self.player_cfg['input_velocity']
             elif c_input.phase == CommandPhase.END:
-                self._player_c_v.vel.y -= self.player_cfg['input_velocity'] 
+                self._player_c_v.vel.y -= self.player_cfg['input_velocity']
+        if c_input.name == 'PLAYER_CLICK':
+            print('yes')
+            if c_input.phase == CommandPhase.START:
+                print('yes')
+                self._bullet_pos = pygame.mouse.get_pos()
+                create_bullet(self.ecs_world, self.bullet_cfg, self._player_entity, self._bullet_pos)
+            elif c_input.phase == CommandPhase.END:
+                print('no')
+                self._bullet_pos = pygame.mouse.get_pos()
     

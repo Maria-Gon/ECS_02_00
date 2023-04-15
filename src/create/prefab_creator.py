@@ -7,6 +7,7 @@ from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
+from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 
@@ -44,7 +45,6 @@ def create_player_square(world: esper.World, player_info: dict, player_lvl_info:
     pos = pygame.Vector2(player_lvl_info['position']['x'] - size.x/2,
                          player_lvl_info['position']['y'] - size.y/2)
     vel = pygame.Vector2(0,0)
-
     player_entity = create_square(world, size, pos, vel, color)
     world.add_component(player_entity, CTagPlayer())
     return player_entity
@@ -56,10 +56,28 @@ def create_enemy_spawner(world:esper.World, level_data:dict):
     
 def create_input_player (world: esper.World):
     input_left = world.create_entity()
-    nput_right = world.create_entity()
-    nput_up = world.create_entity()
-    nput_down = world.create_entity()
+    input_right = world.create_entity()
+    input_up = world.create_entity()
+    input_down = world.create_entity()
     world.add_component(input_left, CInputCommand('PLAYER_LEFT', pygame.K_LEFT))
-    world.add_component(nput_right, CInputCommand('PLAYER_RIGHT', pygame.K_RIGHT))
-    world.add_component(nput_up, CInputCommand('PLAYER_UP', pygame.K_UP))
-    world.add_component(nput_down, CInputCommand('PLAYER_DOWN', pygame.K_DOWN))
+    world.add_component(input_right, CInputCommand('PLAYER_RIGHT', pygame.K_RIGHT))
+    world.add_component(input_up, CInputCommand('PLAYER_UP', pygame.K_UP))
+    world.add_component(input_down, CInputCommand('PLAYER_DOWN', pygame.K_DOWN))
+
+def create_bullet(world: esper.World, bullet_info: dict, player: int, pos_mouse: pygame.Vector2):
+    size = pygame.Vector2(bullet_info['size']['x'],
+                          bullet_info['size']['y'])
+    color = pygame.Color(bullet_info['color']['r'],
+                         bullet_info['color']['g'],
+                         bullet_info['color']['b'])
+    vel = pygame.Vector2(-bullet_info['velocity'],
+                          bullet_info['velocity'])
+    x,y=pos_mouse
+    pos = pygame.Vector2(x, y) ##Hay que corregirlo
+
+    bullet_entity = create_square(world, size, pos, vel, color)
+    world.add_component(bullet_entity, CTagBullet())
+
+def create_input_bullet (world: esper.World):
+    input_click = world.create_entity()
+    world.add_component(input_click, CInputCommand('PLAYER_CLICK', pygame.BUTTON_LEFT))
