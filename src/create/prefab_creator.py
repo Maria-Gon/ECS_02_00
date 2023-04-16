@@ -70,13 +70,22 @@ def create_bullet(world: esper.World, bullet_info: dict, player_entity: int, pos
     color = pygame.Color(bullet_info['color']['r'],
                          bullet_info['color']['g'],
                          bullet_info['color']['b'])
-    vel = pygame.Vector2(bullet_info['velocity'],
-                          bullet_info['velocity'])
+    
     pl_t = world.component_for_entity(player_entity, CTransform)
     pl_s = world.component_for_entity(player_entity, CSurface)
-    pos_x = pl_t.pos.x + pl_s.surf.get_width()/2 ##Hay que corregirlo
+
+    pos_x = pl_t.pos.x + pl_s.surf.get_width()/2 
     pos_y = pl_t.pos.y + pl_s.surf.get_height()/2
+
     pos = pygame.Vector2(pos_x, pos_y)
+
+    x,y = pos_mouse
+
+    b_pos_x = (x-pos_x) 
+    b_pos_y = (y-pos_y) 
+
+    vel = pygame.Vector2(b_pos_x, b_pos_y).normalize() * bullet_info['velocity'] ##Hay que corregirlo
+
     bullet_entity = create_square(world, size, pos, vel, color)
     world.add_component(bullet_entity, CTagBullet())
 

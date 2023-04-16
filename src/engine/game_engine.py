@@ -62,8 +62,9 @@ class GameEngine:
     def _create(self):
         self._player_entity = create_player_square(self.ecs_world, self.player_cfg, self.level_01_cfg['player_spawn'])
         self._player_c_v = self.ecs_world.component_for_entity(self._player_entity, CVelocity)
-        #create_bullet(self.ecs_world, self.bullet_cfg, self._player_entity)
+
         create_enemy_spawner(self.ecs_world, self.level_01_cfg)
+        
         create_input_player(self.ecs_world)
         create_input_bullet(self.ecs_world)
 
@@ -84,13 +85,18 @@ class GameEngine:
 
     def _update(self):
         self._num_bullets = len(self.ecs_world.get_component(CTagBullet))
+
         system_enemy_spawner(self.ecs_world, self.enemies_cfg, self.delta_time)
+
         system_movement(self.ecs_world, self.delta_time)
+
         system_screen_bounce(self.ecs_world, self.screen)
         system_screen_bounce_player(self.ecs_world, self.screen)
         system_screen_bounce_bullet(self.ecs_world, self.screen)
+
         system_collision_player_enemy(self.ecs_world, self._player_entity, self.level_01_cfg)
         system_collision_bullet_enemy(self.ecs_world)
+
         self.ecs_world._clear_dead_entities()
 
     def _draw(self):
